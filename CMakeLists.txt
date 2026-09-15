@@ -56,6 +56,11 @@ ament_vendor(${LIB_NAME_UNDERSCORE}_vendor
   CMAKE_ARGS
     -DSKIP_PYBIND11:BOOL=ON
     -DSKIP_SWIG:BOOL=ON
+    # gz-math builds its pybind11 bindings even with SKIP_PYBIND11=ON; that single huge
+    # translation unit (math8) times out on the macOS CI runner (Alarm clock). Make pybind11
+    # undiscoverable so the python bindings are not built at all.
+    -DCMAKE_DISABLE_FIND_PACKAGE_pybind11:BOOL=ON
+    -DCMAKE_DISABLE_FIND_PACKAGE_Python3:BOOL=ON
   GLOBAL_HOOK
 )
 
