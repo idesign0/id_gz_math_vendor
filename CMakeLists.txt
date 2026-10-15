@@ -57,12 +57,16 @@ ament_vendor(${LIB_NAME_UNDERSCORE}_vendor
   VCS_URL https://github.com/gazebosim/${GITHUB_NAME}.git
   VCS_VERSION ${LIB_VCS_VER}
   CMAKE_ARGS
+    # The python_pybind11 bindings are one huge translation unit (math8) that times out
+    # on the macOS CI runner ('Alarm clock'). SKIP_PYBIND11 is the only switch needed:
+    # in gz-math it guards both the find_package(Python3 REQUIRED) at CMakeLists.txt:99
+    # and the add_subdirectory(python_pybind11) at src/CMakeLists.txt:23.
+    # Do NOT use CMAKE_DISABLE_FIND_PACKAGE_Python3 here -- without SKIP_PYBIND11 set,
+    # gz-math takes the else() branch and CMake hard-errors with
+    # "find_package for module Python3 called with REQUIRED, but
+    #  CMAKE_DISABLE_FIND_PACKAGE_Python3 is enabled."
+    -DSKIP_PYBIND11:BOOL=ON
     -DSKIP_SWIG:BOOL=ON
-    # gz-math builds its pybind11 bindings even with SKIP_PYBIND11=ON; that single huge
-    # translation unit (math8) times out on the macOS CI runner (Alarm clock). Make pybind11
-    # undiscoverable so the python bindings are not built at all.
-    -DCMAKE_DISABLE_FIND_PACKAGE_pybind11:BOOL=ON
-    -DCMAKE_DISABLE_FIND_PACKAGE_Python3:BOOL=ON
   GLOBAL_HOOK
 )
 
